@@ -14,6 +14,8 @@ limit = 50
 def handle_http_codes(status_code):
     if status_code == 403:
         raise RuntimeError("Invalid Holodex API key")
+    elif status_code >= 400:
+        raise RuntimeError(f"An error has occurred (status code: {status_code})")
     elif status_code != 200:
         print(f"Unexpected HTTP status code (status code: {status_code})")
 
