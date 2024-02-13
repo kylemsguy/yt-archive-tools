@@ -82,7 +82,7 @@ if __name__ == "__main__":
     elif 'HOLODEX_API_KEY' in os.environ:
         apikey = os.environ['HOLODEX_API_KEY']
     else:
-        raise RuntimeError("The Holodex API key is required.")
+        apikey = input("Please provide your Holodex API key: ")
     
     channelid = args.channelid
 
