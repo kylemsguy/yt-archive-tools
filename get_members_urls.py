@@ -1,5 +1,9 @@
+import os
+import sys
+
 import json
 import requests
+import argparse
 
 apikey = ""
 channelid = "UC4WvIIAo89_AzGUh1AZ6Dkg"  # Rosemi Lovelock
@@ -64,12 +68,29 @@ def extract_videourls(videodata):
 
 
 if __name__ == "__main__":
-    loadapikey()
+    parser = argparse.ArgumentParser(
+        description="Requests member stream data from Holodex",
+    )
+    parser.add_argument("--apikey", help="Your Holodex API key. Can also be passed in using the HOLODEX_API_KEY environment variable.")
+    parser.add_argument("-v", "--videometa-outfile", default="videometa.json", help="The file to save the raw video metadata to (default: videometa.json)")
+    parser.add_argument("-u", "--urls-outfile", default="urlstodownload.txt", help="The file to save the URL list to (default: urlstodownload.txt)")
+    parser.add_argument("channelid", help="The channel ID of the channel you wish to query")
+    args = parser.parse_args()
+
+    if args.apikey:
+        apikey = args.apikey
+    elif 'HOLODEX_API_KEY' in os.environ:
+        apikey = os.environ['HOLODEX_API_KEY']
+    else:
+        raise RuntimeError("The Holodex API key is required.")
+    
+    channelid = args.channelid
+
     data = get_membersonly(apikey, channelid)
-    with open("videometa.json", 'w') as outfile:
+    with open(args.videometa_outfile, 'w') as outfile:
         json.dump(data, outfile, indent=4)
 
     urls = extract_videourls(data)
-    with open("urlstodownload.txt", 'w') as outfile:
+    with open(args.urls_outfile, 'w') as outfile:
         for u in urls:
             print(u, file=outfile)
