@@ -90,7 +90,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--apikey", help="Your Holodex API key. Can also be passed in using the HOLODEX_API_KEY environment variable.")
     # parser.add_argument("-v", "--videometa-outfile", default="videometa.json", help="Saves a list of URLs for use with yt-dlp to the provided file.")
-    parser.add_argument("-u", "--output-urls", help="The file to save the URL list to (no URLs will be saved if omitted)")
+    parser.add_argument("-u", "--output-urls", default="membersurls.txt", help="The file to save the URL list to (default: membersurls.txt)")
     parser.add_argument("channelid", help="The channel ID of the channel you wish to query")
     args = parser.parse_args()
 
