@@ -6,6 +6,11 @@ channelid = "UC4WvIIAo89_AzGUh1AZ6Dkg"  # Rosemi Lovelock
 endpoint = "https://holodex.net/api/v2/videos"
 limit = 50
 
+def loadapikey():
+    global apikey
+    with open("apikey.txt") as infile:
+        apikey = infile.read().strip()
+
 def get_membersonly(apikey, channelid):
     offset = 0
     video_data = []
@@ -59,6 +64,7 @@ def extract_videourls(videodata):
 
 
 if __name__ == "__main__":
+    loadapikey()
     data = get_membersonly(apikey, channelid)
     with open("videometa.json", 'w') as outfile:
         json.dump(data, outfile, indent=4)
