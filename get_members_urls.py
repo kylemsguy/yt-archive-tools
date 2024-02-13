@@ -90,42 +90,56 @@ if __name__ == "__main__":
     )
     parser.add_argument("--apikey", help="Your Holodex API key. Can also be passed in using the HOLODEX_API_KEY environment variable.")
     # parser.add_argument("-v", "--videometa-outfile", default="videometa.json", help="Saves a list of URLs for use with yt-dlp to the provided file.")
+    parser.add_argument("--video-meta-json", help="Filename of a JSON file containing videos metadata. If provided, Holodex queries are skipped.")
     parser.add_argument("-u", "--output-urls", default="membersurls.txt", help="The file to save the URL list to (default: membersurls.txt)")
-    parser.add_argument("channelid", help="The channel ID of the channel you wish to query")
+    parser.add_argument("-c", "--channelid", help="The channel ID of the channel you wish to query")
     args = parser.parse_args()
+
+    channelid = None
+    data = None
+
+    if not args.channelid and not args.video_meta_json:
+        channelid = input("Channel ID (NOT @handle) of the channel: ")
+        if not channelid:
+            raise ValueError("Channel ID is REQUIRED.")
+    else:
+        channelid = args.channelid
 
     if args.apikey:
         apikey = args.apikey
     elif 'HOLODEX_API_KEY' in os.environ:
         apikey = os.environ['HOLODEX_API_KEY']
-    else:
+    elif not args.video_meta_json:
         apikey = input("Please provide your Holodex API key: ")
+
     
-    channelid = args.channelid
+    if not args.video_meta_json:
+        print("Getting channel info...")
+        channelinfo = get_channel_info(apikey, channelid)
 
-    print("Getting channel info...")
-    channelinfo = get_channel_info(apikey, channelid)
+        channel_en_name = channelinfo['english_name'].replace(" ", "_") if 'english_name' in channelinfo else channelid
+        print(f"Using {channel_en_name=}")
 
-    channel_en_name = channelinfo['english_name'].replace(" ", "_") if 'english_name' in channelinfo else channelid
-    print(f"Using {channel_en_name=}")
+        channelinfo_filename = f"{channel_en_name}-channelinfo.json"
+        print("Writing channel metadata to file")
+        with open(channelinfo_filename, 'w') as outfile:
+            json.dump(channelinfo, outfile, indent=4)
 
-    channelinfo_filename = f"{channel_en_name}-channelinfo.json"
-    print("Writing channel metadata to file")
-    with open(channelinfo_filename, 'w') as outfile:
-        json.dump(channelinfo, outfile, indent=4)
+        print(f"Fetching data from holodex for channel with ID {channelid}")
+        data = get_membersonly(apikey, channelid)
 
-    print(f"Fetching data from holodex for channel with ID {channelid}")
-    data = get_membersonly(apikey, channelid)
+        videodata_filename = f"{channel_en_name}-membervideo-data.json"
+        print(f"Outputting video metadata to {videodata_filename}")
+        with open(videodata_filename, 'w') as outfile:
+            json.dump(data, outfile, indent=4)
+    else:
+        print(f"Loading video meta from provided file: {args.video_meta_json}")
+        with open(args.video_meta_json) as infile:
+            data = json.load(infile)
 
-    videodata_filename = f"{channel_en_name}-membervideo-data.json"
-    print(f"Outputting video metadata to {videodata_filename}")
-    with open(videodata_filename, 'w') as outfile:
-        json.dump(data, outfile, indent=4)
-
-    if args.output_urls:
-        output_urls = args.output_urls
-        print(f"Outputting URLs to {output_urls}")
-        urls = extract_videourls(data)
-        with open(output_urls, 'w') as outfile:
-            for u in urls:
-                print(u, file=outfile)
+    output_urls = args.output_urls
+    print(f"Outputting URLs to {output_urls}")
+    urls = extract_videourls(data)
+    with open(output_urls, 'w') as outfile:
+        for u in urls:
+            print(u, file=outfile)
