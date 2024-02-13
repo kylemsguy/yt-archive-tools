@@ -10,10 +10,6 @@ channelid = "UC4WvIIAo89_AzGUh1AZ6Dkg"  # Rosemi Lovelock
 endpoint = "https://holodex.net/api/v2/videos"
 limit = 50
 
-def loadapikey():
-    global apikey
-    with open("apikey.txt") as infile:
-        apikey = infile.read().strip()
 
 def get_membersonly(apikey, channelid):
     offset = 0
@@ -31,6 +27,10 @@ def get_membersonly(apikey, channelid):
         }
     )
 
+    if r.status_code == 403:
+        raise RuntimeError("Invalid Holodex API key")
+    elif r.status_code != 200:
+        print(f"Unexpected HTTP status code (status code: {r.status_code})")
     response = r.json()
 
     total = response['total']
