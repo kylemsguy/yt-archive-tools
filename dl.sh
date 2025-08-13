@@ -3,7 +3,7 @@ channelname="Rosemi_Lovelock"
 outputfilename='%(upload_date)s-%(title)s-%(id)s.%(ext)s'
 
 # To download members data, make sure you have all the member video URLs in membersurls.txt or change this filename
-memberurlsfile="membersurls.txt"
+membersurlsfile="membersurls.txt"
 
 yt-dlp -a "$membersurlsfile" --cookies-from-browser firefox --no-abort-on-error --sub-langs all --write-subs --embed-subs --add-metadata --write-description --write-thumbnail --embed-thumbnail --embed-metadata --embed-info-json --write-info-json --match-filter !is_live --download-archive "members.txt" "https://www.youtube.com/@${channelname}/membership" -o "members/$outputfilename"
 yt-dlp --cookies-from-browser firefox --no-abort-on-error --sub-langs all --write-subs --embed-subs --add-metadata --write-description --write-thumbnail --embed-thumbnail --embed-metadata --write-info-json --match-filter !is_live --download-archive "streams.txt" "https://www.youtube.com/@${channelname}/streams" -o "streams/$outputfilename"
